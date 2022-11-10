@@ -7,11 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>单词筛选系统</title>
     <style>
-        body input {
-            margin: 0 auto;
-        }
-
-        #ke {
+        #fanyiquke {
             width: 100%;
             overflow-x: auto;
         }
@@ -21,30 +17,18 @@
             gap: 2px;
         }
 
-        .fanyikuan {
-            height: 100px;
-            background: rgb(0, 0, 0);
-            overflow-x: hidden;
-            overflow-y: auto;
+        .fanyikuai {
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 1em;
+            padding: 0.5em;
         }
 
         .fanyishuxing {
-            width: 120px;
-            color: #fff;
+            color: rgb(255, 255, 255);
+            text-align: center;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
-            width: 120px;
-            height: 25px;
-        }
-
-        .danci {
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-            background-color: aqua;
-            width: 120px;
-            height: 25px;
         }
 
         #danciqu {
@@ -58,9 +42,17 @@
             overflow-y: auto;
         }
 
+        .danci {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 120px;
+            height: 25px;
+            border-radius: 0.5em;
+        }
 
-
-        p {
+        p,
+        h1 {
             margin: 0 auto;
             display: block;
             color: #ff6666;
@@ -70,115 +62,59 @@
 
         }
 
-        input[type=range] {
-            display: block;
-            width: 80%;
-        }
-
         input[type=text] {
+            margin: 0 auto;
             display: block;
             line-height: 1em;
             font-weight: 900;
             font-size: 2em;
             font-display: unset;
             text-align: center;
-            outline-style: none;
-            border: 1px solid #c0c4cc;
-            border-radius: 5px;
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            padding: 10px 15px;
-            box-sizing: border-box;
-            font-family: "Microsoft soft";
-            border-color: #f07b00;
-            outline: 0;
-            -webkit-box-shadow: inset 0 10px 10px rgba(0, 0, 0, 0.075),
-                #ff8400;
-            box-shadow: inset 0 10px 10px rgba(0, 0, 0, 0.075),
-                #f07b00;
+            border: 2px solid #c0c4cc;
+            border-radius: 1em;
         }
     </style>
 </head>
 
 <body>
-    <p>正则表达式</p>
-    <input type="text" value="" id="zhengzekuang">
-    <p>关键字母</p>
-    <input type="text" value="" id="guanjianzikuang">
-    <div id="yincang" style="display: none;position:relative;">
-        <p>匹配级别</p>
-        <input type="range" name="range" id="quanzhongkuang" min="0" max="0">
-    </div>
+    <h1>单词匹配</h1>
+    <input type="text" value="" id="shurukuang">
     <div id="jieguotongjiqu"></div>
-    <div id="ke">
+    <div id="fanyiquke">
         <div id="fanyiqu" style="display: none;"></div>
     </div>
     <div id="danciqu"></div>
 </body>
 <script type="module">
     import data from './dic.json' assert {type: 'json'}
-    var jieguodic = data
-    const zhengzekuang = document.getElementById("zhengzekuang")
-    const guanjianzikuang = document.getElementById("guanjianzikuang")
-    const quanzhongkuang = document.getElementById("quanzhongkuang")
-    const yincang = document.getElementById("yincang")
+    const shurukuang = document.getElementById("shurukuang")
     const fanyiqu = document.getElementById("fanyiqu")
     const danciqu = document.getElementById("danciqu")
     const jieguotongjiqu = document.getElementById("jieguotongjiqu")
-    function shaixuan() {
-        var guanjiancichangdu = guanjianzikuang.value.length
-        quanzhongkuang.max = guanjiancichangdu
-        if (this != quanzhongkuang) {
-            quanzhongkuang.value = quanzhongkuang.max / 3 * 2
-        }
-        if (guanjiancichangdu != "0") {
-            yincang.style.display = "block"
-        } else {
-            yincang.style.display = "none"
-        }
-        var gujianci = new Array()
-        var quanzhong = Number(quanzhongkuang.value)
-        gujianci = guanjianzikuang.value.split("")
-        var newjieguodic = jieguodic.filter((item, index, arr) => {
-            var pipeidu = 0
-            var chazhao = item[0]
-            gujianci.forEach((sonitem, sonindex, sonarr) => {
-                if (chazhao.indexOf(sonitem) != -1) {
-                    pipeidu++
-                    chazhao = chazhao.replace(sonitem, "")
-                }
-            })
-            if (pipeidu >= quanzhong) {
-                return true
-            }
-        })
-        if (newjieguodic.length > 40000) {
-            jieguotongjiqu.innerHTML = `<p>结果${newjieguodic.length}过多无法显示</p>`
+    function xianshi(jieguodic) {
+        const color = { "none.": "aqua", "n.": "navajowhite", "abbr.": "firebrick", "adj.": "rebeccapurple", "prep.": "khaki", "v.": "yellow", "vi.": "yellowgreen", "vt.": "orange", "adv.": "lawngreen","int.":"blue"}
+        if (jieguodic.length > 10000) {
+            jieguotongjiqu.innerHTML = `<p>结果${jieguodic.length}过多无法显示</p>`
             danciqu.innerHTML = ""
         } else {
-            jieguotongjiqu.innerHTML = `<p style="display:block;">结果${newjieguodic.length}</p>`
+            jieguotongjiqu.innerHTML = `<p style="display:block;">结果${jieguodic.length}</p>`
             var array = new Array()
-            newjieguodic.forEach((item, index, arr) => {
-                array.push(`<div  class="danci" title="${item[0]}" data-shuju="${item}">${item[0]}</div>`)
+            jieguodic.forEach((item, index, arr) => {
+                array.push(`<div  class="danci" title="${item[0]}" data-shuju="${item}" style="background-color:${color[item[1]]}";>${item[0]}</div>`)
             })
             danciqu.innerHTML = array.join("")
         }
     }
-    function zhengzepipei() {
-        var zhengze = new RegExp(zhengzekuang.value, "g")
-        jieguodic = data.filter(v => {
+    function zhengzepipei(zhengze) {
+        return data.filter(v => {
             return zhengze.test(v[0])
         })
     }
-    zhengzekuang.addEventListener("input", () => {
-        zhengzepipei()
-        shaixuan()
+    shurukuang.addEventListener("input", () => {
+        xianshi(zhengzepipei(new RegExp(shurukuang.value, "g")))
     })
-    guanjianzikuang.addEventListener("input", () => {
-        shaixuan()
-    })
-    quanzhongkuang.addEventListener("input", shaixuan)
+
+
     danciqu.addEventListener("click", (e) => {
         var cishuxing = e.target.dataset.shuju.split(",")
         cishuxing = cishuxing.map((v) => {
@@ -186,7 +122,7 @@
         })
         if (e.target.dataset.shuju) {
             fanyiqu.style.display = "inline-flex"
-            fanyiqu.innerHTML += `<div class="fanyikuan">${cishuxing.join("")}</div>`
+            fanyiqu.innerHTML += `<div class="fanyikuai">${cishuxing.join("")}</div>`
         } else {
             fanyiqu.style.display = "none"
         }
