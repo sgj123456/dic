@@ -1,139 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh-cn">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>单词筛选系统</title>
-    <style>
-        #fanyiquke {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        #fanyiqu {
-            display: inline-flex;
-            gap: 2px;
-        }
-
-        .fanyikuai {
-            height: 6em;
-            overflow: auto;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 1em;
-            padding: 0.5em;
-        }
-
-        .fanyishuxing {
-            color: rgb(255, 255, 255);
-            text-align: center;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        #danciqu {
-            height: 420px;
-            width: 100%;
-            display: flex;
-            gap: 2px;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            overflow-x: hidden;
-            overflow-y: auto;
-        }
-
-        .danci {
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-            width: 120px;
-            height: 25px;
-            border-radius: 0.5em;
-        }
-
-        p,
-        h1 {
-            margin: 0 auto;
-            display: block;
-            color: #ff6666;
-            font-size: 1.5em;
-            font-weight: 900;
-            text-align: center;
-
-        }
-
-        input[type=text] {
-            margin: 0 auto;
-            width:65% ;
-            display: block;
-            line-height: 1em;
-            font-weight: 900;
-            font-size: 2em;
-            font-display: unset;
-            text-align: center;
-            border: 2px solid #c0c4cc;
-            border-radius: 1em;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>单词匹配</h1>
-    <input type="text" value="" id="shurukuang">
-    <div id="jieguotongjiqu"></div>
-    <div id="fanyiquke">
-        <div id="fanyiqu" style="display: none;"></div>
-    </div>
-    <div id="danciqu"></div>
-</body>
-<script type="module">
-    import data from './dic.json' assert {type: 'json'}
-    const shurukuang = document.getElementById("shurukuang")
-    const fanyiqu = document.getElementById("fanyiqu")
-    const danciqu = document.getElementById("danciqu")
-    const jieguotongjiqu = document.getElementById("jieguotongjiqu")
-    function xianshi(jieguodic) {
-        const color = { "none.": "aqua", "n.": "navajowhite", "abbr.": "firebrick", "adj.": "rebeccapurple", "prep.": "khaki", "v.": "yellow", "vi.": "yellowgreen", "vt.": "orange", "adv.": "lawngreen","int.":"blue"}
-        if (jieguodic.length > 10000) {
-            jieguotongjiqu.innerHTML = `<p>结果${jieguodic.length}过多无法显示</p>`
-            danciqu.innerHTML = ""
-        } else {
-            jieguotongjiqu.innerHTML = `<p style="display:block;">结果${jieguodic.length}</p>`
-            var array = new Array()
-            jieguodic.forEach((item, index, arr) => {
-                array.push(`<div  class="danci" title="${item[0]}" data-shuju="${item}" style="background-color:${color[item[1]]}";>${item[0]}</div>`)
-            })
-            danciqu.innerHTML = array.join("")
-        }
-    }
-    function zhengzepipei(zhengze) {
-        return data.filter(v => {
-            return zhengze.test(v[0])
-        })
-    }
-    shurukuang.addEventListener("input", () => {
-        xianshi(zhengzepipei(new RegExp(shurukuang.value, "g")))
-    })
-
-
-    danciqu.addEventListener("click", (e) => {
-        var cishuxing = e.target.dataset.shuju.split(",")
-        cishuxing = cishuxing.map((v) => {
-            return `<div title="${v}" class="fanyishuxing">${v}</div>`
-        })
-        if (e.target.dataset.shuju) {
-            fanyiqu.style.display = "inline-flex"
-            fanyiqu.innerHTML += `<div class="fanyikuai">${cishuxing.join("")}</div>`
-        } else {
-            fanyiqu.style.display = "none"
-        }
-    })
-    fanyiqu.addEventListener("click", (e) => {
-        try { fanyiqu.removeChild(e.target) } catch (v) { fanyiqu.removeChild(e.target.parentNode) }
-    })
-
-</script>
-
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>万词王</title>
+    <script type="module" crossorigin src="./assets/index.b929a9da.js"></script>
+    <link rel="stylesheet" href="./assets/index.48ea2217.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    
+  </body>
 </html>
