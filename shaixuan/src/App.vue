@@ -13,10 +13,10 @@ onMounted(() => {
   let zhuangtai = true;
   setInterval(() => {
     if (zhuangtai) {
-      h1.value = "单词检索系统";
+      h1.value = "万词王";
       zhuangtai = false;
     } else {
-      h1.value = "支持正则表达式";
+      h1.value = "正则表达式";
       zhuangtai = true;
     }
   }, 1500);
@@ -84,14 +84,14 @@ function fanyishou(e) {
 
 <style scoped>
 #input {
-  width: 40rem;
+  width: 100%;
   line-height: 2em;
   text-align: center;
   font-size: 2em;
   border-radius: 2em;
 }
 #danciqu {
-  width: 40rem;
+  width: 100%;
   height: 60rem;
   display: flex;
   gap: 0.125em;
@@ -116,8 +116,7 @@ function fanyishou(e) {
 }
 #fanyiquke {
   padding: 1rem 0;
-  margin:auto;
-  width: 40rem;
+  width: 100%;
   overflow-x: auto;
 }
 #fanyiqu {
@@ -130,5 +129,12 @@ function fanyishou(e) {
   background: rgba(0, 0, 0, 0.9);
   border-radius: 1em;
   padding: 0.5em;
+}
+p{
+  font-weight: 600;
+  font-size: 1.5em;
+  line-height: 1.5em;
+  margin: 0.2rem;
+
 }
 </style>
