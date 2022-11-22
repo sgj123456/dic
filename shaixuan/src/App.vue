@@ -3,23 +3,28 @@ import { ref, onMounted, computed } from "vue";
 import danciVue from "./components/danci.vue";
 import fanyiVue from "./components/fanyi.vue";
 import dic from "../public/dic.json";
-const h1 = ref("单词检索系统");
+const h1 = ref("万词王");
 function zhengzepipei(zhengze) {
   return dic.filter((v) => {
     return zhengze.test(v[0]);
   });
 }
 onMounted(() => {
-  let zhuangtai = true;
-  setInterval(() => {
-    if (zhuangtai) {
-      h1.value = "万词王";
-      zhuangtai = false;
-    } else {
-      h1.value = "正则表达式";
-      zhuangtai = true;
-    }
-  }, 1500);
+  function yanshi() {
+    return new Promise((resolive) => {
+      setTimeout(() => {
+        resolive();
+      }, 2000);
+    });
+  }
+  const jianyi = ["支持正则表达式", "^表示开头$表示结尾", "默认不区分大小写"];
+  (() => {
+    let i = 0;
+    setInterval(() => {
+      h1.value = jianyi[i];
+      i = i >= jianyi.length - 1 ? 0 : i + 1;
+    }, 1000);
+  })();
 });
 
 const debounce = (fn, delay) => {
@@ -83,6 +88,9 @@ function fanyishou(e) {
 </template>
 
 <style scoped>
+h1 {
+  font-size: 2em;
+}
 #input {
   width: 100%;
   line-height: 2em;
@@ -96,11 +104,7 @@ function fanyishou(e) {
   display: flex;
   gap: 0.125em;
   flex-wrap: wrap;
-  gap: 2px;
-  flex-wrap: wrap;
   justify-content: space-around;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 .danci {
   width: 7em;
@@ -130,11 +134,10 @@ function fanyishou(e) {
   border-radius: 1em;
   padding: 0.5em;
 }
-p{
+p {
   font-weight: 600;
   font-size: 1.5em;
   line-height: 1.5em;
   margin: 0.2rem;
-
 }
 </style>
