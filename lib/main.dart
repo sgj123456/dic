@@ -1,20 +1,40 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:word_king/collect.dart';
+import 'package:word_king/json.dart';
+import 'sqlite.dart';
 
-void main() async {
-  runApp(
-    MaterialApp(
-      home: Scaffold(
+void main() {
+  runApp(MaterialApp(
+    home: DefaultTabController(
+      length: 2,
+      child: Scaffold(
           appBar: AppBar(
             title: const Text("万词王"),
             leading: const Icon(Icons.abc),
             backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+            bottom: const TabBar(
+              tabs: [
+                Tab(
+                  icon: Icon(Icons.ice_skating),
+                ),
+                Tab(
+                  icon: Icon(Icons.icecream),
+                )
+              ],
+            ),
           ),
-          body: const Home()),
+          body: TabBarView(
+            children: [
+              const Home(),
+              CollectWords(
+                dbIO: DbIO(),
+              )
+            ],
+          )),
     ),
-  );
+  ));
 }
 
 class Home extends StatelessWidget {
@@ -37,8 +57,8 @@ class WordSystem extends StatefulWidget {
 
 class _WordSystem extends State<WordSystem> {
   final _controller = TextEditingController();
-  List<List<String>> list = [];
-  late List<List<String>> dictionary;
+  List<WordAll> result = [];
+  List<WordAll> dictionary = [];
   Timer? timer;
 
   @override
@@ -46,11 +66,9 @@ class _WordSystem extends State<WordSystem> {
     super.initState();
     AssetBundle bundle = DefaultAssetBundle.of(context);
     bundle.loadString("json/dictionary.json").then((value) {
-      List dynamic = json.decode(value).toList();
-      var temp = dynamic
-          .map<List<String>>((e) => e.map<String>((v) => v.toString()).toList())
-          .toList();
-      dictionary = temp;
+      dictionary = json.decode(value).map<WordAll>((v) {
+        return WordAll.fromJson(v);
+      }).toList();
     });
   }
 
@@ -74,12 +92,11 @@ class _WordSystem extends State<WordSystem> {
                 debounce(() {
                   setState(() {
                     if (input.isEmpty) {
-                      list = [];
+                      result = [];
                     } else {
-                      list = dictionary
-                          .where(
-                              (element) => RegExp(input).hasMatch(element[0]))
-                          .toList();
+                      result = dictionary.where((element) {
+                        return RegExp(input).hasMatch(element.word!);
+                      }).toList();
                     }
                   });
                 });
@@ -94,7 +111,10 @@ class _WordSystem extends State<WordSystem> {
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(5),
-            child: Words(list: list),
+            child: Words(
+              result: result,
+              dictionary: dictionary,
+            ),
           ),
         )
       ],
@@ -103,15 +123,24 @@ class _WordSystem extends State<WordSystem> {
 }
 
 class Words extends StatefulWidget {
-  const Words({super.key, required this.list});
+  const Words({super.key, required this.result, required this.dictionary});
 
-  final List<List<String>> list;
+  final List<WordAll> dictionary;
+  final List<WordAll> result;
 
   @override
   State<StatefulWidget> createState() => _Words();
 }
 
 class _Words extends State<Words> {
+  late DbIO dbIO;
+
+  @override
+  void initState() {
+    super.initState();
+    dbIO = DbIO();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
@@ -119,13 +148,21 @@ class _Words extends State<Words> {
         padding: const EdgeInsets.all(0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3, childAspectRatio: 2.5),
-        itemCount: widget.list.length,
+        itemCount: widget.result.length,
         itemBuilder: (BuildContext context, int index) {
           return Container(
             margin: const EdgeInsets.all(2),
             child: ElevatedButton(
                 style:
                     ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
+                onLongPress: () async {
+                  await dbIO.insertCollectWord(WordData(
+                      id: index,
+                      word: widget.result[index].word!,
+                      attribute: json.encode(widget.result[index].attribute),
+                      note: "null"));
+                  await dbIO.getCollectWord().then((value) {});
+                },
                 onPressed: () {
                   FocusScope.of(context).requestFocus(FocusNode());
                   setState(() {
@@ -133,7 +170,7 @@ class _Words extends State<Words> {
                         context: context,
                         builder: (ctx) {
                           return SimpleDialog(
-                            title: Text(widget.list[index][0]),
+                            title: Text(widget.result[index].word!),
                             titlePadding: const EdgeInsets.all(10),
                             backgroundColor: Colors.white,
                             elevation: 5,
@@ -142,18 +179,12 @@ class _Words extends State<Words> {
                                     BorderRadius.all(Radius.circular(10))),
                             children: (() {
                               List<Widget> widgetList = [];
-                              for (int i = 1;
-                                  i < widget.list[index].length - 1;
-                                  i += 2) {
+                              widget.result[index].attribute
+                                  ?.forEach((key, value) {
                                 widgetList.add(ListTile(
-                                  title: Center(
-                                    child: Text(
-                                      "${widget.list[index][i]} ${widget.list[index][i + 1]}",
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
+                                  title: Text("$key $value"),
                                 ));
-                              }
+                              });
                               return widgetList;
                             })(),
                           );
@@ -161,7 +192,7 @@ class _Words extends State<Words> {
                   });
                 },
                 child: Text(
-                  widget.list[index][0],
+                  widget.result[index].word!,
                   overflow: TextOverflow.ellipsis,
                 )),
           );
